@@ -22,13 +22,13 @@ def loadGraph(path):
     """
     :param - path: path to edge list file
 
-    return type: snap.PUNGraph
+    return type: snap.PNGraph
     return: Graph loaded from edge list at @path
 
     """
     ############################################################################
 
-    Graph = snap.LoadEdgeList(snap.PNGraph, path, 0, 1, ",")
+    Graph = snap.LoadEdgeList(snap.PNEANet, path, 0, 1, ",")
 
     print('Number of nodes: %d' %Graph.GetNodes())
     print('Number of edges: %d' %snap.CntUniqUndirEdges(Graph))
@@ -66,6 +66,16 @@ def loadWeights(path):
                 g_sds[(node1, node2)] = g_sd
     return means, sds, g_means, g_sds
 
+def add_weights(graph, weights):
+    Attr = "time"
+    for k, v in means.iteritems():
+        edge = graph.GetEI(k[0], k[1])
+        graph.AddFltAttrDatE(edge, v, Attr)
+
+    for edge in graph.Edges():
+        print graph.GetFltAttrDatE(edge, Attr)
+
 if __name__ == "__main__":
     washington = loadGraph(path)
     means, sds, g_means, g_sds = loadWeights(path)
+    add_weights(washington, means)
