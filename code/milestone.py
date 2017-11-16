@@ -16,9 +16,10 @@ import random
 import scipy.stats
 import time
 
-path = '../data/washington/washington-2016-1_1.csv'
+path_adjacency = '../data/geo/washington_DC_censustracts.csv'
+path_weights = '../data/washington/washington-2016-1_1.csv'
 
-def loadGraph(path):
+def loadUNGraph(path):
     """
     :param - path: path to edge list file
 
@@ -29,6 +30,24 @@ def loadGraph(path):
     ############################################################################
 
     Graph = snap.LoadEdgeList(snap.PNEANet, path, 0, 1, ",")
+
+    print('Number of nodes: %d' %Graph.GetNodes())
+    print('Number of edges: %d' %snap.CntUniqUndirEdges(Graph))
+
+    return Graph
+
+
+def loadNGraph(path):
+    """
+    :param - path: path to edge list file
+
+    return type: snap.PNGraph
+    return: Graph loaded from edge list at @path
+
+    """
+    ############################################################################
+
+    Graph = snap.LoadEdgeList(snap.PNGraph, path, 0, 1, ",")
 
     print('Number of nodes: %d' %Graph.GetNodes())
     print('Number of edges: %d' %snap.CntUniqUndirEdges(Graph))
@@ -76,6 +95,6 @@ def add_weights(graph, weights):
         print graph.GetFltAttrDatE(edge, Attr)
 
 if __name__ == "__main__":
-    washington = loadGraph(path)
-    means, sds, g_means, g_sds = loadWeights(path)
+    geoGraph = loadUNGraph(path_adjacency)
+    means, sds, g_means, g_sds = loadWeights(path_weights)
     add_weights(washington, means)
