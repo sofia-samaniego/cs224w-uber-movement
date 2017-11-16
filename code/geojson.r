@@ -1,6 +1,7 @@
 library(rgeos)
 library(rgdal)
 library(igraph)
+library(geosphere)
 
 main_path <- "/Users/jvrsgsty/Documents/Stanford/ICME/CS224W/project/data/"
 cities <- c("bogota/bogota_cadastral",
@@ -14,7 +15,7 @@ cities <- c("bogota/bogota_cadastral",
             "sydney/sydney_tz",
             "washington/washington_DC_censustracts",
             "washington/washington_DC_taz")
-
+# Generate spatial graph for adjacent polygons on the GeoJSON files
 for (i in 1:length(cities)){
   filename <- paste(main_path, cities[i], sep="")
   polys <- readOGR(paste(filename,"json", sep="."), "OGRGeoJSON")
@@ -28,3 +29,11 @@ for (i in 1:length(cities)){
   write.table(GG, paste(filename,"csv", sep="."), row.names = FALSE, col.names= FALSE, sep=",")
 }
 
+# Compute the distances between centroids in the polygons
+for (i in 1:length(cities)){
+  filename <- paste(main_path, cities[i], sep="")
+  polys <- readOGR(paste(filename,"json", sep="."), "OGRGeoJSON")
+  centroids <- gCentroid(polys, byid=TRUE)
+  dists <- distm(centroids, centroids)
+  write.table(dists, paste(filename, paste("dists", "csv", sep="."),sep="-"), row.names = FALSE, col.names= FALSE, sep=",")
+}
