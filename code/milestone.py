@@ -21,6 +21,8 @@ path_adjacency = '../data/washington/washington_DC_censustracts.csv'
 path_weights = '../data/washington/washington-2016-1_1.csv'
 file_save_edgelist = '../data/washington/weighted_edgelist.csv'
 path_distances = '../data/washington/washington_DC_censustracts-dists.csv'
+path_longlat = '../data/washington/washington_DC_censustracts_centroid.csv'
+path_communities = '../data/washington/communities.txt'
 
 def loadPNEANGraph(path):
     """
@@ -173,10 +175,20 @@ def computeWeightedBetweennessCentr(graph, Attr):
     return NIdBtwH
 
 def graphViz(graph, nodeWeight, Attr):
-    G=nx.Graph()
-    for NodeI in graph.Nodes():
-        G.add_node(NodeI.GetId(), nodeWeight = nodeWeight[NodeI.GetId()])
+    """
+    :param - graph: weighted graph of type snap.PNEANGraph
+    :param - nodeWeight: dictionary with key: node id, value: weight
+    :param - attr: string equal to the type of weights used to
+    compute the betweenessCentr. For example: "mean_time"
 
+    return: saves a plot
+    """
+    G=nx.Graph()
+    latlong = np.genfromtxt(path_longlat, delimiter=',')
+
+    for NodeI in graph.Nodes():
+        nodeID = NodeI.GetId()
+        G.add_node(nodeID, nodeWeight = nodeWeight[NodeI.GetId()], pos = (latlong[nodeID-1][0], latlong[nodeID-1][1]))
     for EdgeI in graph.Edges():
         N1 = EdgeI.GetSrcNId()
         N2 = EdgeI.GetDstNId()
@@ -185,25 +197,25 @@ def graphViz(graph, nodeWeight, Attr):
     nodes, nodeWeight = zip(*nx.get_node_attributes(G,'nodeWeight').items())
     edges, edgeWeight = zip(*nx.get_edge_attributes(G,'edgeWeight').items())
 
-    #pos = nx.spring_layout(G)
-    pos = nx.spring_layout(G)
-    nx.draw(G, pos, arrows = True, node_shape = '.', s=1, nodelist=nodes, node_color=nodeWeight, edge_list=edges, edge_color=edgeWeight, width=2.0, node_cmap=plt.cm.Blues, edge_cmap=plt.cm.Blues)
-    plt.savefig("nodes.pdf")
+    pos = nx.spring_layout(G,k=0.5,iterations=20)
+    nx.draw(G, nx.get_node_attributes(G, 'pos'), arrows = True, node_shape = '.', with_labels = False, nodelist=nodes, node_color=nodeWeight, \
+        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.tab20c)
+    plt.savefig("communities.pdf")
 
 if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
     means, sds, g_means, g_sds = loadWeights(path_weights)
-    dists = loadDists(path_distances)
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
-    pageRank = computePageRank(weightedGeoGraph, "mean_time")
-    betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
-    saveWeights(geoGraph, means, file_save_edgelist)
-    graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    # pageRank = computePageRank(weightedGeoGraph, "mean_time")
+    # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    # saveWeights(geoGraph, means, file_save_edgelist)
+    # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
 
-    # pageRank.SortByDat(False)
-    # for k in pageRank:
-    #     print k, pageRank[k]
-    #
-    # betweenCentr.SortByDat(False)
-    # for k in betweenCentr:
-    #     print k, betweenCentr[k]
+    communities = np.genfromtxt(path_communities, delimiter=',')
+    communities_dict = {}
+    for c in communities:
+        communities_dict[c[0]] = c[1]
+
+    graphViz(weightedGeoGraph, communities_dict, "mean_time")
+    # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    # dists = loadDists(path_distances)
