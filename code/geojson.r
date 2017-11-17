@@ -34,6 +34,9 @@ for (i in 1:length(cities)){
   filename <- paste(main_path, cities[i], sep="")
   polys <- readOGR(paste(filename,"json", sep="."), "OGRGeoJSON")
   centroids <- gCentroid(polys, byid=TRUE)
+  write.table(centroids, paste(filename, paste("centroid", "csv", sep="."), sep="_"), row.names = FALSE, col.names= FALSE, sep=",")
   dists <- distm(centroids, centroids)
   write.table(dists, paste(filename, paste("dists", "csv", sep="."),sep="-"), row.names = FALSE, col.names= FALSE, sep=",")
 }
+
+
