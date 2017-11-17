@@ -16,6 +16,7 @@ import scipy.stats
 import time
 import collections
 import networkx as nx
+import operator
 
 path_adjacency = '../data/washington/washington_DC_censustracts.csv'
 path_weights = '../data/washington/washington-2016-1_1.csv'
@@ -23,6 +24,8 @@ file_save_edgelist = '../data/washington/weighted_edgelist.csv'
 path_distances = '../data/washington/washington_DC_censustracts-dists.csv'
 path_longlat = '../data/washington/washington_DC_censustracts_centroid.csv'
 path_communities = '../data/washington/communities.txt'
+path_hits = '../data/washington/HITS.txt'
+path_closeness = '../data/washington/closeness.txt'
 
 def loadPNEANGraph(path):
     """
@@ -174,6 +177,38 @@ def computeWeightedBetweennessCentr(graph, Attr):
 
     return NIdBtwH
 
+def computeWeightedInDegree(graph, Attr):
+    """
+    :param - graph: weighted graph of type snap.PNEANGraph
+
+    return type: dictionary
+    return: a dictionary mapping node id to in degree
+    """
+    InDegree = []
+    for nodeI in graph.Nodes():
+        indeg = 0
+        node1 = nodeI.GetId()
+        for node2 in nodeI.GetInEdges():
+            indeg += graph.GetFltAttrDatE(graph.GetEI(node2, node1), Attr)
+        InDegree.append((node1, indeg))
+    return InDegree
+
+def computeWeightedOutDegree(graph, Attr):
+    """
+    :param - graph: weighted graph of type snap.PNEANGraph
+
+    return type: dictionary
+    return: a dictionary mapping node id to out degree
+    """
+    OutDegree = []
+    for nodeI in graph.Nodes():
+        outdeg = 0
+        node1 = nodeI.GetId()
+        for node2 in nodeI.GetOutEdges():
+            outdeg += graph.GetFltAttrDatE(graph.GetEI(node1, node2), Attr)
+        OutDegree.append((node1, outdeg))
+    return OutDegree
+
 def graphViz(graph, nodeWeight, Attr):
     """
     :param - graph: weighted graph of type snap.PNEANGraph
@@ -199,8 +234,8 @@ def graphViz(graph, nodeWeight, Attr):
 
     pos = nx.spring_layout(G,k=0.5,iterations=20)
     nx.draw(G, nx.get_node_attributes(G, 'pos'), arrows = True, node_shape = '.', with_labels = False, nodelist=nodes, node_color=nodeWeight, \
-        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.tab20c)
-    plt.savefig("communities.pdf")
+        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.Blues)
+    plt.savefig("../closeness.png", dpi=1000)
 
 if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
@@ -208,14 +243,36 @@ if __name__ == "__main__":
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
     # pageRank = computePageRank(weightedGeoGraph, "mean_time")
     # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
-    # saveWeights(geoGraph, means, file_save_edgelist)
+    #
     # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    #
+    # communities = np.genfromtxt(path_communities, delimiter=',')
+    # communities_dict = {}
+    # for c in communities:
+    #     communities_dict[c[0]] = c[1]
+    #
+    closeness = np.genfromtxt(path_closeness, delimiter=',')
+    closeness_dict = {}
+    for c in closeness:
+        closeness_dict[c[0]] = c[1]
+    #
+    # hits = np.genfromtxt(path_hits, delimiter=',')
+    # hubs_dict = {}
+    # for c in hits:
+    #     hubs_dict[c[0]] = c[1]
+    #
+    # authorities_dict = {}
+    # for c in hits:
+    #     authorities_dict[c[0]] = c[2]
 
-    communities = np.genfromtxt(path_communities, delimiter=',')
-    communities_dict = {}
-    for c in communities:
-        communities_dict[c[0]] = c[1]
+    indeg = computeWeightedInDegree(weightedGeoGraph, "mean_time")
+    outdeg = computeWeightedOutDegree(weightedGeoGraph, "mean_time")
+    #
+    # print sorted(indeg, key=lambda x: x[1], reverse = True)[:10]
+    # print "#########"
+    # print sorted(outdeg, key=lambda x: x[1], reverse = True)[:10]
 
-    graphViz(weightedGeoGraph, communities_dict, "mean_time")
+    graphViz(weightedGeoGraph, closeness_dict, "mean_time")
     # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
     # dists = loadDists(path_distances)
+    # saveWeights(geoGraph, means, file_save_edgelist)
