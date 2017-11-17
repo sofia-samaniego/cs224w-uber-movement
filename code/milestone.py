@@ -15,15 +15,17 @@ import numpy as np
 import random
 import scipy.stats
 import time
+import collections
+import networkx as nx
 
-path_adjacency = '../data/geo/washington_DC_censustracts.csv'
+path_adjacency = '../data/washington/washington_DC_censustracts.csv'
 path_weights = '../data/washington/washington-2016-1_1.csv'
 
-def loadUNGraph(path):
+def loadPNEANGraph(path):
     """
     :param - path: path to edge list file
 
-    return type: snap.PNGraph
+    return type: snap.PNEANGraph
     return: Graph loaded from edge list at @path
 
     """
@@ -63,10 +65,10 @@ def loadWeights(path):
     return: Return sign associated with node pairs. Both pairs, (a,b) and (b,a)
     are stored as keys. Self-edges are NOT included.
     """
-    means = {}
-    sds = {}
-    g_means = {}
-    g_sds = {}
+    means = collections.defaultdict(float)
+    sds = collections.defaultdict(float)
+    g_means = collections.defaultdict(float)
+    g_sds = collections.defaultdict(float)
     with open(path, 'r') as ipfile:
         for line in ipfile:
             if line[0] != '#':
@@ -85,16 +87,87 @@ def loadWeights(path):
                 g_sds[(node1, node2)] = g_sd
     return means, sds, g_means, g_sds
 
-def add_weights(graph, weights):
-    Attr = "time"
-    for k, v in means.iteritems():
-        edge = graph.GetEI(k[0], k[1])
-        graph.AddFltAttrDatE(edge, v, Attr)
+def add_weights(graph, weights, Attr):
+    """
+    :param - graph: graph of type snap.PNEANGraph
+    :param - weights: defaultdict mapping pairs of nodes to weight
+    :param - attr: string equal to the type of weights being added
+             For example:  "mean_time"
 
+    return type: snap.PNEANGraph
+    return: graph with edges weighted using param: weights
+    """
+    for EdgeI in graph.Edges():
+        N1 = EdgeI.GetSrcNId()
+        N2 = EdgeI.GetDstNId()
+        graph.AddFltAttrDatE(EdgeI, means[(N1, N2)], Attr)
+
+    return graph
+
+def computePageRank(graph, Attr):
+    """
+    :param - graph: weighted graph of type snap.PNEANGraph
+    :param - attr: string equal to the type of weights used to
+    compute the pageRank. For example: "mean_time"
+
+    return type: snap.TIntFltH()
+    return: a dictionary mapping node id to page rank
+    """
+    PRankH = snap.TIntFltH()
+    snap.GetWeightedPageRank(graph, PRankH, Attr, 0.85, 1e-4, 100)
+    return PRankH
+
+def computeWeightedBetweennessCentr(graph, Attr):
+    """
+    :param - graph: weighted graph of type snap.PNEANGraph
+    :param - attr: string equal to the type of weights used to
+    compute the betweenessCentr. For example: "mean_time"
+
+    return type: snap.TIntFltH()
+    return: a dictionary mapping node id to betweeness centrality measure
+    """
+    NIdBtwH = snap.TIntFltH()
+    EdgeBtwH = snap.TIntPrFltH()
+
+    attr = snap.TFltV()
     for edge in graph.Edges():
-        print graph.GetFltAttrDatE(edge, Attr)
+        attr.Add(graph.GetFltAttrDatE(edge, Attr))
+
+    snap.GetWeightedBetweennessCentr(graph, NIdBtwH, EdgeBtwH, attr, 1.0, True)
+
+    return NIdBtwH
+
+def graphViz(graph, nodeWeight, Attr):
+    G=nx.Graph()
+    for NodeI in graph.Nodes():
+        G.add_node(NodeI.GetId(), nodeWeight = nodeWeight[NodeI.GetId()])
+
+    for EdgeI in graph.Edges():
+        N1 = EdgeI.GetSrcNId()
+        N2 = EdgeI.GetDstNId()
+        G.add_edge(N1, N2, edgeWeight = graph.GetFltAttrDatE(EdgeI, Attr))
+
+    nodes, nodeWeight = zip(*nx.get_node_attributes(G,'nodeWeight').items())
+    edges, edgeWeight = zip(*nx.get_edge_attributes(G,'edgeWeight').items())
+
+    #pos = nx.spring_layout(G)
+    pos = nx.spring_layout(G)
+    nx.draw(G, pos, arrows = True, node_shape = '.', s=1, nodelist=nodes, node_color=nodeWeight, edge_list=edges, edge_color=edgeWeight, width=2.0, node_cmap=plt.cm.Blues, edge_cmap=plt.cm.Blues)
+    plt.savefig("nodes.pdf")
+
 
 if __name__ == "__main__":
-    geoGraph = loadUNGraph(path_adjacency)
+    geoGraph = loadPNEANGraph(path_adjacency)
     means, sds, g_means, g_sds = loadWeights(path_weights)
-    add_weights(washington, means)
+    weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
+    pageRank = computePageRank(weightedGeoGraph, "mean_time")
+    betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+
+    # pageRank.SortByDat(False)
+    # for k in pageRank:
+    #     print k, pageRank[k]
+    #
+    # betweenCentr.SortByDat(False)
+    # for k in betweenCentr:
+    #     print k, betweenCentr[k]
