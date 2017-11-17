@@ -97,7 +97,7 @@ def loadDists(path):
     """
     :param - path: path to a distance matrix csv file
 
-    return type: dictionary (key = node pair (a,b), value = sign)
+    return type: dictionary (key = node pair (a,b), value = weight)
     return: A dictionary of distances (in meters) between centroids of nodes
     """
     dists = collections.defaultdict(float)
