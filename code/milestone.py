@@ -20,6 +20,7 @@ import networkx as nx
 
 path_adjacency = '../data/washington/washington_DC_censustracts.csv'
 path_weights = '../data/washington/washington-2016-1_1.csv'
+file_save_edgelist = '../data/washington/weighted_edgelist.csv'
 
 def loadPNEANGraph(path):
     """
@@ -49,7 +50,7 @@ def loadNGraph(path):
     """
     ############################################################################
 
-    Graph = snap.LoadEdgeList(snap.PNGraph, path, 0, 1, ",")
+    Graph = snap.LoadEdgeList(snap.PUNGraph, path, 0, 1, ",")
 
     print('Number of nodes: %d' %Graph.GetNodes())
     print('Number of edges: %d' %snap.CntUniqUndirEdges(Graph))
@@ -103,6 +104,21 @@ def add_weights(graph, weights, Attr):
         graph.AddFltAttrDatE(EdgeI, means[(N1, N2)], Attr)
 
     return graph
+
+def saveWeights(graph, weights, filename):
+    """
+    :param - graph: graph of type snap.PNGraph
+    :param - weights: defaultdict mapping pairs of nodes to weight
+    :param - filename: path to file where weighted edgelist will be stored
+    """
+    f = open(filename, 'w')
+    for EdgeI in graph.Edges():
+        s = EdgeI.GetSrcNId()
+        d = EdgeI.GetDstNId()
+        w = weights[(s, d)]
+        if w != 0:
+            f.write(str(s) + ',' + str(d) + ',' + str(w) + "\n")
+    f.close()
 
 def computePageRank(graph, Attr):
     """
@@ -162,6 +178,7 @@ if __name__ == "__main__":
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
     pageRank = computePageRank(weightedGeoGraph, "mean_time")
     betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    saveWeights(geoGraph, means, file_save_edgelist)
     graphViz(weightedGeoGraph, betweenCentr, "mean_time")
 
     # pageRank.SortByDat(False)
