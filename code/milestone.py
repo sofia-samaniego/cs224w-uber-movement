@@ -241,21 +241,21 @@ if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
     means, sds, g_means, g_sds = loadWeights(path_weights)
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
-    # pageRank = computePageRank(weightedGeoGraph, "mean_time")
-    # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
-    # closeness = np.genfromtxt(path_closeness, delimiter=',')
-    # closeness_dict = {}
-    # for c in closeness:
-    #     closeness_dict[c[0]] = c[1]
-    # graphViz(weightedGeoGraph, pageRank, "mean_time", "pageRank")
-    # graphViz(weightedGeoGraph, betweenCentr, "mean_time", "betweenCentr")
-    # graphViz(weightedGeoGraph, closeness_dict, "mean_time", "closeness")
+    pageRank = computePageRank(weightedGeoGraph, "mean_time")
+    betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    closeness = np.genfromtxt(path_closeness, delimiter=',')
+    closeness_dict = {}
+    for c in closeness:
+        closeness_dict[c[0]] = c[1]
+    graphViz(weightedGeoGraph, pageRank, "mean_time", "pageRank")
+    graphViz(weightedGeoGraph, betweenCentr, "mean_time", "betweenCentr")
+    graphViz(weightedGeoGraph, closeness_dict, "mean_time", "closeness")
     #
-    communities = np.genfromtxt(path_communities, delimiter=',')
-    communities_dict = {}
-    for c in communities:
-        communities_dict[c[0]] = c[1]
-    graphViz(weightedGeoGraph, communities_dict, "mean_time", "communities")
+    # communities = np.genfromtxt(path_communities, delimiter=',')
+    # communities_dict = {}
+    # for c in communities:
+    #     communities_dict[c[0]] = c[1]
+    # graphViz(weightedGeoGraph, communities_dict, "mean_time", "communities")
     #
     #
     # hits = np.genfromtxt(path_hits, delimiter=',')
@@ -270,9 +270,9 @@ if __name__ == "__main__":
     indeg = computeWeightedInDegree(weightedGeoGraph, "mean_time")
     outdeg = computeWeightedOutDegree(weightedGeoGraph, "mean_time")
     #
-    print sorted(indeg, key=lambda x: x[1], reverse = True)[:10]
+    print sorted(indeg, key=lambda x: x[1], reverse = True)[:5]
     # print "#########"
-    print sorted(outdeg, key=lambda x: x[1], reverse = True)[:10]
+    print sorted(outdeg, key=lambda x: x[1], reverse = True)[:5]
 
     # graphViz(weightedGeoGraph, closeness_dict, "mean_time")
     # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
