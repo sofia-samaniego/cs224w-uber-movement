@@ -22,6 +22,7 @@ path_weights = '../data/washington/washington-2016-1_1.csv'
 file_save_edgelist = '../data/washington/weighted_edgelist.csv'
 path_distances = '../data/washington/washington_DC_censustracts-dists.csv'
 path_longlat = '../data/washington/washington_DC_censustracts_centroid.csv'
+path_communities = '../data/washington/communities.txt'
 
 def loadPNEANGraph(path):
     """
@@ -198,17 +199,23 @@ def graphViz(graph, nodeWeight, Attr):
 
     pos = nx.spring_layout(G,k=0.5,iterations=20)
     nx.draw(G, nx.get_node_attributes(G, 'pos'), arrows = True, node_shape = '.', with_labels = False, nodelist=nodes, node_color=nodeWeight, \
-        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, node_cmap=plt.cm.Blues, edge_cmap=plt.cm.Blues)
-    plt.savefig("nodes1.pdf")
+        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.tab20c)
+    plt.savefig("communities.pdf")
 
 if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
     means, sds, g_means, g_sds = loadWeights(path_weights)
-    dists = loadDists(path_distances)
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
-    pageRank = computePageRank(weightedGeoGraph, "mean_time")
-    betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
-    saveWeights(geoGraph, means, file_save_edgelist)
-    graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    # pageRank = computePageRank(weightedGeoGraph, "mean_time")
+    # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    # saveWeights(geoGraph, means, file_save_edgelist)
+    # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
 
-    graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    communities = np.genfromtxt(path_communities, delimiter=',')
+    communities_dict = {}
+    for c in communities:
+        communities_dict[c[0]] = c[1]
+
+    graphViz(weightedGeoGraph, communities_dict, "mean_time")
+    # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    # dists = loadDists(path_distances)
