@@ -48,3 +48,8 @@ plot(g, vertex.label=NA)
 
 membership <- data.frame(node_id = as.numeric(V(g)), comm = as.numeric(V(g)$color))
 write.table(membership, "communities.txt", row.names = FALSE, col.names = FALSE, sep = ",")
+
+
+mo <- cluster_leading_eigen(G, steps = -1, weights = wel$V3, start = NULL,
+                            options = arpack_defaults, callback = NULL, extra = NULL,
+                            env = parent.frame())
