@@ -209,7 +209,7 @@ def computeWeightedOutDegree(graph, Attr):
         OutDegree.append((node1, outdeg))
     return OutDegree
 
-def graphViz(graph, nodeWeight, Attr):
+def graphViz(graph, nodeWeight, Attr, plt_name):
     """
     :param - graph: weighted graph of type snap.PNEANGraph
     :param - nodeWeight: dictionary with key: node id, value: weight
@@ -234,8 +234,8 @@ def graphViz(graph, nodeWeight, Attr):
 
     pos = nx.spring_layout(G,k=0.5,iterations=20)
     nx.draw(G, nx.get_node_attributes(G, 'pos'), arrows = True, node_shape = '.', with_labels = False, nodelist=nodes, node_color=nodeWeight, \
-        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.Blues)
-    plt.savefig("../closeness.png", dpi=1000)
+        edge_list=edges, edge_color=[np.log(y+1) for y in edgeWeight], width=.5, cmap=plt.cm.tab20c)
+    plt.savefig("../{}.png".format(plt_name))
 
 if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
@@ -243,18 +243,20 @@ if __name__ == "__main__":
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
     # pageRank = computePageRank(weightedGeoGraph, "mean_time")
     # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
+    # closeness = np.genfromtxt(path_closeness, delimiter=',')
+    # closeness_dict = {}
+    # for c in closeness:
+    #     closeness_dict[c[0]] = c[1]
+    # graphViz(weightedGeoGraph, pageRank, "mean_time", "pageRank")
+    # graphViz(weightedGeoGraph, betweenCentr, "mean_time", "betweenCentr")
+    # graphViz(weightedGeoGraph, closeness_dict, "mean_time", "closeness")
     #
-    # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
+    communities = np.genfromtxt(path_communities, delimiter=',')
+    communities_dict = {}
+    for c in communities:
+        communities_dict[c[0]] = c[1]
+    graphViz(weightedGeoGraph, communities_dict, "mean_time", "communities")
     #
-    # communities = np.genfromtxt(path_communities, delimiter=',')
-    # communities_dict = {}
-    # for c in communities:
-    #     communities_dict[c[0]] = c[1]
-    #
-    closeness = np.genfromtxt(path_closeness, delimiter=',')
-    closeness_dict = {}
-    for c in closeness:
-        closeness_dict[c[0]] = c[1]
     #
     # hits = np.genfromtxt(path_hits, delimiter=',')
     # hubs_dict = {}
@@ -268,11 +270,9 @@ if __name__ == "__main__":
     indeg = computeWeightedInDegree(weightedGeoGraph, "mean_time")
     outdeg = computeWeightedOutDegree(weightedGeoGraph, "mean_time")
     #
-    # print sorted(indeg, key=lambda x: x[1], reverse = True)[:10]
+    print sorted(indeg, key=lambda x: x[1], reverse = True)[:10]
     # print "#########"
-    # print sorted(outdeg, key=lambda x: x[1], reverse = True)[:10]
+    print sorted(outdeg, key=lambda x: x[1], reverse = True)[:10]
 
-    graphViz(weightedGeoGraph, closeness_dict, "mean_time")
+    # graphViz(weightedGeoGraph, closeness_dict, "mean_time")
     # graphViz(weightedGeoGraph, betweenCentr, "mean_time")
-    # dists = loadDists(path_distances)
-    # saveWeights(geoGraph, means, file_save_edgelist)
