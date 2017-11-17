@@ -1,4 +1,3 @@
-
 ################################################################################
 # CS 224W (Fall 2017) - Project
 # Uber Movement
@@ -6,7 +5,7 @@
 # jvrsgsty@stanford.edu
 # pearson3@stanford.edu
 # sofiasf@stanford.edu
-# Last Updated: Nov 2, 2017
+# Last Updated: Nov 16, 2017
 ################################################################################
 
 import snap
@@ -20,6 +19,7 @@ import networkx as nx
 
 path_adjacency = '../data/washington/washington_DC_censustracts.csv'
 path_weights = '../data/washington/washington-2016-1_1.csv'
+path_distances = '../data/washington/washington_DC_censustracts-dists.csv'
 
 def loadPNEANGraph(path):
     """
@@ -45,7 +45,6 @@ def loadNGraph(path):
 
     return type: snap.PNGraph
     return: Graph loaded from edge list at @path
-
     """
     ############################################################################
 
@@ -61,9 +60,10 @@ def loadWeights(path):
     """
     :param - path: path to edge list file
 
-    return type: dictionary (key = node pair (a,b), value = sign)
-    return: Return sign associated with node pairs. Both pairs, (a,b) and (b,a)
-    are stored as keys. Self-edges are NOT included.
+    return type: dictionary (key = node pair (a,b), value = weight)
+    return: Return 4 weights associated with node pairs: mean, standard
+            deviation, geometric mean and geometric standard deviation of time
+            of travel
     """
     means = collections.defaultdict(float)
     sds = collections.defaultdict(float)
@@ -86,6 +86,25 @@ def loadWeights(path):
                 g_means[(node1, node2)] = g_mean
                 g_sds[(node1, node2)] = g_sd
     return means, sds, g_means, g_sds
+
+def loadDists(path):
+    """
+    :param - path: path to a distance matrix csv file
+
+    return type: dictionary (key = node pair (a,b), value = sign)
+    return: A dictionary of distances (in meters) between centroids of nodes
+    """
+    dists = collections.defaultdict(float)
+    with open(path, 'r') as ipfile:
+        i = 0
+        for line in ipfile:
+            if line[0] != '#':
+                line_arr = line.split(',')
+                for j in range(i+1):
+                    dists[(i+1,j+1)] = float(line_arr[j])
+                    dists[(j+1,i+1)] = float(line_arr[j])
+                i += 1
+    return dists
 
 def add_weights(graph, weights, Attr):
     """
@@ -155,10 +174,10 @@ def graphViz(graph, nodeWeight, Attr):
     nx.draw(G, pos, arrows = True, node_shape = '.', s=1, nodelist=nodes, node_color=nodeWeight, edge_list=edges, edge_color=edgeWeight, width=2.0, node_cmap=plt.cm.Blues, edge_cmap=plt.cm.Blues)
     plt.savefig("nodes.pdf")
 
-
 if __name__ == "__main__":
     geoGraph = loadPNEANGraph(path_adjacency)
     means, sds, g_means, g_sds = loadWeights(path_weights)
+    dists = loadDists(path_distances)
     weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
     pageRank = computePageRank(weightedGeoGraph, "mean_time")
     betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
