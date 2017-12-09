@@ -1,8 +1,8 @@
 library(dplyr)
 
-save_graph <- function(data, city, year, quarter, h){
+save_graph <- function(data, city, year, quarter, day_type, h){
     data <- data %>% filter(hod == h)
-    prefix <- paste(city, year, quarter, sep = '-')
+    prefix <- paste(city, year, quarter, day_type, sep = '-')
     write.table(data, paste(paste(prefix, h, sep = "_"),"csv",sep="."), 
               row.names = FALSE, 
               col.names = FALSE,
@@ -10,24 +10,33 @@ save_graph <- function(data, city, year, quarter, h){
                 
     return ()
 } 
-read_all_data <- function(filename, city, year, quarter){
-    global_path <- '/Users/Sofia/Desktop/Stanford/Autumn\ 2017/CS224W/project'
+read_all_data <- function(filename, city, year, quarter, day_type){
+    global_path <- '/Volumes/BackupSofiaS/data/raw-uber-movement'
     path <- paste(global_path, filename, sep = '/')
     data <- read.csv(path)
-    save_path <- paste('/Users/Sofia/Desktop/data/',city,'raw', sep = '/')
+    save_path <- paste( '/Volumes/BackupSofiaS/data',city,'raw', sep = '/')
     setwd(save_path)
     for (h in 0:23){
-        save_graph(data, city, year, quarter, h)
+        save_graph(data, city, year, quarter, day_type, h)
     }
 }
 
-file_list <- c('bogota-cadastral-2016-1-All-HourlyAggregate.csv',
-               'boston-censustracts-2016-1-All-HourlyAggregate.csv',
-               'johannesburg-gpzones-2016-1-All-HourlyAggregate.csv',
-               'manila-hexes-2016-1-All-HourlyAggregate.csv',
-               'paris-iris-2016-1-All-HourlyAggregate (1).csv',
-               'sydney-tz-2016-1-All-HourlyAggregate.csv',
-               'washington_DC-censustracts-2016-1-All-HourlyAggregate.csv')
+file_list_wkday <- c('bogota-cadastral-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'boston-censustracts-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'johannesburg-gpzones-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'manila-hexes-2017-3-OnlyWeekdays-HourlyAggregate.csv', 
+                     'paris-iris-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'sydney-tz-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'washington_DC-censustracts-2017-3-OnlyWeekdays-HourlyAggregate.csv')
+
+file_list_wkend <- c('bogota-cadastral-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'boston-censustracts-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'johannesburg-gpzones-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'manila-hexes-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'paris-iris-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'sydney-tz-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'washington_DC-censustracts-2017-3-OnlyWeekends-HourlyAggregate.csv')
+
 city_list <- c('bogota',
                'boston',
                'johannesburg',
@@ -36,4 +45,5 @@ city_list <- c('bogota',
                'sydney',
                'washington')
 
-sapply(1:7, function(i) read_all_data(file_list[i], city_list[i], 2016, 1))
+sapply(1:7, function(i) read_all_data(file_list_wkday[i], city_list[i], 2017, 3, 'wkday'))
+sapply(1:7, function(i) read_all_data(file_list_wkend[i], city_list[i], 2017, 3, 'wkend'))
