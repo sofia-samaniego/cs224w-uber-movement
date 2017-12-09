@@ -1,15 +1,15 @@
 library(dplyr)
 library(igraph)
+library(ape)
 
-global_path <- '/Users/Mackenzie/Documents/cs224w/cs224w-uber-movement/data'
+global_path <- '/Users/Sofia/Desktop/data'
 # global_path <- './data'
 
 create_textfiles <- function(city,
                              year,
                              quarter,
                              hod,
-                             num_remove = 'NA',
-                             maxmod = FALSE){
+                             num_clusters){
     print(hod)
     # Set working directory
     setwd(paste(global_path, city, sep = '/'))
@@ -24,7 +24,8 @@ create_textfiles <- function(city,
     global_path_edgelist <- paste(global_path, path_edgelist, sep = '/')
     edgelist <- read.csv(global_path_edgelist, header = FALSE)
     names(edgelist) <- c('s_id', 'd_id', 'weight')
-    edgelist <- edgelist %>% filter(weight > 0)
+    
+    # edgelist <- edgelist %>% filter(weight > 0)
 
     # Create graph
     g <- graph.data.frame(edgelist, directed=TRUE)
@@ -68,41 +69,22 @@ create_textfiles <- function(city,
                 row.names = FALSE,
                 col.names = FALSE,
                 sep = ",")
+    
+    # Clustering 
+    # Run Girvan-Newman clustering algorithm.
+    communities <- edge.betweenness.community(g, 
+                                              weights = edgelist$weight,
+                                              directed = TRUE,
+                                              edge.betweenness = TRUE)
+    
+    as_phylo(communities, use.modularity = FALSE)
+    
+    memb <- cut_at(communities, step = 700)
 
-    # Compute communities using G-N algorithm and save it to file
-    GA <- as_adjacency_matrix(g,type="both",
-                              names=TRUE,
-                              sparse=FALSE,
-                              attr="weight");
+    clusters <- data.frame(nodes = as.numeric(V(g)), cluster = as.numeric(memb))
+    summ_table <- clusters %>% group_by(cluster) %>% summarize(num_members = n())
 
-    ebc <- cluster_edge_betweenness(g,
-                                    weights = edgelist$weight,
-                                    directed = TRUE,
-                                    edge.betweenness = TRUE,
-                                    merges = TRUE,
-                                    bridges = TRUE,
-                                    modularity = TRUE,
-                                    membership = TRUE)
 
-    # Now we have the merges/splits and we need to calculate the modularity
-    # for each merge for this we'll use a function that for each edge
-    # removed will create a second graph, check for its membership and use
-    # that membership to calculate the modularity
-
-    mods <- sapply(0:ecount(g), function(i){
-        g2 <- delete.edges(g, ebc$removed.edges[seq(length=i)])
-        cl <- clusters(g2)$membership
-        modularity(g,cl)
-    })
-
-    if(maxmod){
-        g2 <- delete.edges(g, ebc$removed.edges[seq(length=which.max(mods)-1)])
-    } else{
-        g2 <- delete.edges(g, ebc$removed.edges[seq(length=num_remove)])
-    }
-
-    communities <- data.frame(node_id = as.numeric(V(g)),
-                              comm = clusters(g2)$membership)
     file_communities <- paste(paste(prefix, 'communities', hod, sep = '_'),
                               'txt',
                               sep = '.')
@@ -110,13 +92,17 @@ create_textfiles <- function(city,
 
     global_path_communities <- paste(global_path, path_communities, sep = '/')
 
-    write.table(communities,
+    write.table(clusters,
                 global_path_communities,
                 row.names = FALSE,
                 col.names = FALSE,
                 sep = ",")
+    return(summ_table)
 }
 
-sapply(0:23, function(hod) create_textfiles('washington', '2016', '1', hod, maxmod = TRUE))
+summaries <- lapply(0:23, function(hod) create_textfiles('washington', '2016', '1', hod, num_clusters = 60))
+lapply(summaries, print)
+sapply(summaries, function(table) summary(table$num_members))
 
-#create_textfiles('washington', '2016', '1', 1, 2500)
+
+
