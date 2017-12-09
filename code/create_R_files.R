@@ -2,7 +2,7 @@ library(dplyr)
 library(igraph)
 library(ape)
 
-global_path <- '/Volumes/BackupSofiaS/data'
+global_path <- '/Users/Mackenzie/Documents/cs224w/cs224w-uber-movement/data'
 # global_path <- './data'
 
 create_textfiles <- function(city,
@@ -13,7 +13,7 @@ create_textfiles <- function(city,
     print(hod)
     # Set working directory
     setwd(paste(global_path, city, sep = '/'))
-    prefix <- paste(city, year, quarter, sep = '-')
+    prefix <- paste(city, year, quarter,'wkday', sep = '-')
 
     # Read in weighted edgelist
     file_edgelist <- paste(paste(prefix, 'edgelist', hod, sep = '_'),
@@ -100,9 +100,20 @@ create_textfiles <- function(city,
     return(summ_table)
 }
 
-summaries <- lapply(0:23, function(hod) create_textfiles('washington', '2016', '1', hod, num_clusters = 60))
-lapply(summaries, print)
-sapply(summaries, function(table) summary(table$num_members))
+city_list <- c('bogota',
+               'boston',
+               'johannesburg',
+               'manila',
+               'paris',
+               'sydney',
+               'washington')
+
+for (i in 1:7) {
+  summaries <- lapply(0:23, function(hod) create_textfiles(city_list[i], '2017', '3', hod, num_clusters = 60))
+  #lapply(summaries, print)
+  sapply(summaries, function(table) summary(table$num_members))
+}
+
 
 
 

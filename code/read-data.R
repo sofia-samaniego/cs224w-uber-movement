@@ -25,7 +25,7 @@ file_list_wkday <- c('bogota-cadastral-2017-3-OnlyWeekdays-HourlyAggregate.csv',
                      'boston-censustracts-2017-3-OnlyWeekdays-HourlyAggregate.csv',
                      'johannesburg-gpzones-2017-3-OnlyWeekdays-HourlyAggregate.csv',
                      'manila-hexes-2017-3-OnlyWeekdays-HourlyAggregate.csv', 
-                     'paris-iris-2017-3-OnlyWeekdays-HourlyAggregate.csv',
+                     'paris-communes-2017-3-OnlyWeekdays-HourlyAggregate.csv',
                      'sydney-tz-2017-3-OnlyWeekdays-HourlyAggregate.csv',
                      'washington_DC-censustracts-2017-3-OnlyWeekdays-HourlyAggregate.csv')
 
@@ -33,7 +33,7 @@ file_list_wkend <- c('bogota-cadastral-2017-3-OnlyWeekends-HourlyAggregate.csv',
                      'boston-censustracts-2017-3-OnlyWeekends-HourlyAggregate.csv',
                      'johannesburg-gpzones-2017-3-OnlyWeekends-HourlyAggregate.csv',
                      'manila-hexes-2017-3-OnlyWeekends-HourlyAggregate.csv',
-                     'paris-iris-2017-3-OnlyWeekends-HourlyAggregate.csv',
+                     'paris-communes-2017-3-OnlyWeekends-HourlyAggregate.csv',
                      'sydney-tz-2017-3-OnlyWeekends-HourlyAggregate.csv',
                      'washington_DC-censustracts-2017-3-OnlyWeekends-HourlyAggregate.csv')
 
@@ -45,5 +45,5 @@ city_list <- c('bogota',
                'sydney',
                'washington')
 
-sapply(1:7, function(i) read_all_data(file_list_wkday[i], city_list[i], 2017, 3, 'wkday'))
-sapply(1:7, function(i) read_all_data(file_list_wkend[i], city_list[i], 2017, 3, 'wkend'))
+sapply(7:7, function(i) read_all_data(file_list_wkday[i], city_list[i], 2017, 3, 'wkday'))
+sapply(7:7, function(i) read_all_data(file_list_wkend[i], city_list[i], 2017, 3, 'wkend'))
