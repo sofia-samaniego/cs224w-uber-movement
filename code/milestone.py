@@ -242,7 +242,7 @@ def fromR(path_closeness, path_communities, path_hits):
 
     return closeness_dict, communities_dict, hubs_dict, authorities_dict
 
-def graphViz(graph, nodeWeight, latlong, Attr, plot_name):
+def graphViz(graph, nodeWeight, latlong, Attr, plot_name, format='png'):
     """
     :param - graph: weighted graph of type snap.PNEANGraph
     :param - nodeWeight: dictionary with key: node id, value: weight
@@ -268,8 +268,9 @@ def graphViz(graph, nodeWeight, latlong, Attr, plot_name):
 
     pos = nx.spring_layout(G,k=0.5,iterations=20)
     nx.draw(G, nx.get_node_attributes(G, 'pos'), arrows = True, node_shape = '.', with_labels = False, nodelist=nodes, node_color=nodeWeight, \
-        edge_list=edges, edge_color = '#92cae2', width=.5, cmap=plt.cm.tab20c) #
-    plt.savefig(plot_name, transparent=True)
+        node_size=150, edge_list=edges, edge_color = '#92cae2', width=.5, cmap=plt.cm.tab20c) #
+    plt.savefig(plot_name + '.' + format, transparent=True, format=format)
+    plt.clf()
 #edge_color = [np.log(y+1) for y in edgeWeight]
 if __name__ == "__main__":
 
@@ -286,19 +287,19 @@ if __name__ == "__main__":
         print city
 
         # Grab graph with edges only between geographically adjacent nodes and their lat/longitude
-        path_adjacency = '/Volumes/G-DRIVE XBSGS/data/{}/geo/{}_graph.csv'.format(city, city_name)
-        path_latlong = '/Volumes/G-DRIVE XBSGS/data/{}/geo/{}_centroid.csv'.format(city, city_name)
+        path_adjacency = base_path + '/data/{}/geo/{}_graph.csv'.format(city, city_name)
+        path_latlong = base_path + '/data/{}/geo/{}_centroid.csv'.format(city, city_name)
         geoGraph = loadPNEANGraph(path_adjacency)
         latlong = np.genfromtxt(path_latlong, delimiter=',')
 
-        for week in ["wkday", "wkend"]:
+        for week in ["wkday"]:#, "wkend"]:
             print week
 
             for i in range(0,24):
                 print i
 
                 # Construct weighted graph, where edges are only between geographically adjacent nodes
-                path_weights = '/Volumes/G-DRIVE XBSGS/data/{}/raw/{}-2017-3-{}_{}.csv'.format(city, city, week, i)
+                path_weights = base_path + '/data/{}/raw/{}-2017-3-{}_{}.csv'.format(city, city, week, i)
                 means = loadWeights(path_weights)
                 weightedGeoGraph = add_weights(geoGraph, means, "mean_time")
 
@@ -310,22 +311,22 @@ if __name__ == "__main__":
                 ################## STEP 2
                 # Betweenness Centrality
                 # betweenCentr = computeWeightedBetweennessCentr(weightedGeoGraph, "mean_time")
-                # plot_name = base_path + '/data/{}/measures/betweenness/{}-2017-3-{}_betweenness_{}.png'.format(city, city, week, i)
+                # plot_name = base_path + '/data/{}/measures/betweenness/{}-2017-3-{}_betweenness_{}'.format(city, city, week, i)
                 # graphViz(weightedGeoGraph, betweenCentr, latlong, "mean_time", plot_name)
 
                 # # In Degree
                 # indeg = computeWeightedInDegree(weightedGeoGraph, "mean_time")
-                # plot_name = base_path + '/data/{}/measures/in_degree/{}-2017-3-{}_in_degree_{}.png'.format(city, city, week, i)
+                # plot_name = base_path + '/data/{}/measures/in_degree/{}-2017-3-{}_in_degree_{}'.format(city, city, week, i)
                 # graphViz(weightedGeoGraph, indeg, latlong, "mean_time", plot_name)
 
                 # # Out Degree
                 # outdeg = computeWeightedOutDegree(weightedGeoGraph, "mean_time")
-                # plot_name = base_path + '/data/{}/measures/out_degree/{}-2017-3-{}_out_degree_{}.png'.format(city, city, week, i)
+                # plot_name = base_path + '/data/{}/measures/out_degree/{}-2017-3-{}_out_degree_{}'.format(city, city, week, i)
                 # graphViz(weightedGeoGraph, outdeg, latlong, "mean_time", plot_name)
 
                 # # Page Rank
                 # pagerank = computePageRank(weightedGeoGraph, "mean_time")
-                # plot_name = base_path + '/data/{}/measures/pagerank/{}-2017-3-{}_pagerank_{}.png'.format(city, city, week, i)
+                # plot_name = base_path + '/data/{}/measures/pagerank/{}-2017-3-{}_pagerank_{}'.format(city, city, week, i)
                 # graphViz(weightedGeoGraph, pagerank, latlong, "mean_time", plot_name)
 
 
@@ -336,17 +337,17 @@ if __name__ == "__main__":
                 path_HITS = base_path + '/data/{}/measures/HITS/{}-2017-3-{}_HITS_{}.txt'.format(city, city, week, i)
                 #
                 closeness_dict, communities_dict, hubs_dict, authorities_dict = fromR(path_closeness, path_communities, path_HITS)
-                # plt_path_closeness = base_path + '/data/{}/measures/closeness/{}-2017-3-{}_closeness_{}.png'.format(city, city, week, i)
-                plt_path_communities = base_path + '/data/{}/measures/communities/{}-2017-3-{}_communities_{}.png'.format(city, city, week, i)
-                # plt_path_hubs = base_path + '/data/{}/measures/HITS/{}-2017-3-{}_hubs_{}.png'.format(city, city, week, i)
-                # plt_path_authorities = base_path + '/data/{}/measures/HITS/{}-2017-3-{}_authorities_{}.png'.format(city, city, week, i)
+                # plt_path_closeness = base_path + '/data/{}/measures/closeness/{}-2017-3-{}_closeness_{}'.format(city, city, week, i)
+                plt_path_communities = base_path + '/data/{}/measures/communities/{}-2017-3-{}_communities_{}'.format(city, city, week, i)
+                # plt_path_hubs = base_path + '/data/{}/measures/HITS/{}-2017-3-{}_hubs_{}'.format(city, city, week, i)
+                # plt_path_authorities = base_path + '/data/{}/measures/HITS/{}-2017-3-{}_authorities_{}'.format(city, city, week, i)
                 #
-                # graphViz(weightedGeoGraph, closeness_dict, latlong, "mean_time", plt_path_closeness)
-                # graphViz(weightedGeoGraph, hubs_dict, latlong, "mean_time", plt_path_hubs)
-                # graphViz(weightedGeoGraph, authorities_dict, latlong, "mean_time", plt_path_authorities)
+                # graphViz(weightedGeoGraph, closeness_dict, latlong, "mean_time", plt_path_closeness, format='eps')
+                # graphViz(weightedGeoGraph, hubs_dict, latlong, "mean_time", plt_path_hubs, format='eps')
+                # graphViz(weightedGeoGraph, authorities_dict, latlong, "mean_time", plt_path_authorities, format='eps')
                 #
                 # ################## STEP 4
-                graphViz(weightedGeoGraph, communities_dict, latlong, "mean_time", plt_path_communities)
+                graphViz(weightedGeoGraph, communities_dict, latlong, "mean_time", plt_path_communities, format='eps')
 
 # geoGraph = loadPNEANGraph(path_adjacency)
 # means, sds, g_means, g_sds = loadWeights(path_weights)
