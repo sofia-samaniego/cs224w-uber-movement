@@ -2,7 +2,7 @@ library(dplyr)
 library(igraph)
 library(ape)
 
-global_path <- '/Users/Sofia/Desktop/data'
+global_path <- '/Volumes/BackupSofiaS/data'
 # global_path <- './data'
 
 create_textfiles <- function(city,
