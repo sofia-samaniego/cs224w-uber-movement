@@ -25,7 +25,7 @@ create_textfiles <- function(city,
     edgelist <- read.csv(global_path_edgelist, header = FALSE)
     names(edgelist) <- c('s_id', 'd_id', 'weight')
     
-    edgelist <- edgelist %>% filter(weight > 0)
+    # edgelist <- edgelist %>% filter(weight > 0)
 
     # Create graph
     g <- graph.data.frame(edgelist, directed=TRUE)
