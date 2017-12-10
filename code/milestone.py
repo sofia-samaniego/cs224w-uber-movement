@@ -276,12 +276,12 @@ if __name__ == "__main__":
 
     cities = {}
     cities["washington"] = "washington_DC_censustracts"
-    cities["sydney"] = "sydney_tz"
-    cities["paris"] = "paris_communes"
-    cities["manila"] = "manila_hexes"
-    cities["johannesburg"] = "johannesburg_gpzones"
-    cities["boston"] = "boston_censustracts"
-    cities["bogota"] = "bogota_cadastral"
+    #cities["sydney"] = "sydney_tz"
+    #cities["paris"] = "paris_communes"
+    #cities["manila"] = "manila_hexes"
+    #cities["johannesburg"] = "johannesburg_gpzones"
+    #cities["boston"] = "boston_censustracts"
+    #cities["bogota"] = "bogota_cadastral"
 
     for city, city_name in cities.iteritems():
         print city
