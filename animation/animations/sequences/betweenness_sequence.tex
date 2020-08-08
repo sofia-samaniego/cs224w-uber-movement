@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage[%showframe, % To debug margin sizes
+            top=1cm,
+            bottom=0cm,
+            left=1cm,
+            right=1cm,
+            landscape]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{forloop}
+\pagenumbering{gobble}
+
+\begin{document}
+
+\newcounter{thehour}
+\forloop{thehour}{0}{\value{thehour} < 3}{
+  \centering{\Huge \textbf{Washington: betweenness}}
+  \vspace{-1cm}
+  \begin{tabular}
+  \begin{figure}[H]
+  \includegraphics[height=0.95\textheight]{../../measures/betweenness/washington-2017-3-wkday_betweenness_\arabic{thehour}}
+  \end{figure}
+  \end{tabular}
+  \vspace{-1cm}
+  {\Huge Trips from \arabic{thehour}:00 to \the\numexpr\value{thehour}+1\relax:00}
+  \newpage
+}
+
+\end{document}
